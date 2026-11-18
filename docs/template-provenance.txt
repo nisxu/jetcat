@@ -1,0 +1,10 @@
+JetCat provenance — 2026-11-18
+The project contains modified portions of a locally supplied FlappyBird template.
+Its original MIT notice, Copyright (c) 2025 Admin, remains unchanged in LICENSE.
+Original package metadata: _sourceId=46abb11f-fc14-443e-88c2-7399237934d7;
+_storeId=9a9cd7fefdd2c1caf1ebd0a1c03fc51a.
+These unused catalog fields were removed from runtime project metadata, not erased from provenance.
+The original publisher/download URL has not yet been verified. Refactoring does not establish independent authorship.
+Current visual assets were confirmed by the project owner as recreated for JetCat.
+Historical art-generation notes and original masters remain in the external local archive.
+Gameplay-facing template names were migrated while script/prefab UUIDs were retained for Cocos bindings.

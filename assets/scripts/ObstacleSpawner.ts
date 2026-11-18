@@ -1,11 +1,12 @@
+import { GAMEPLAY } from './GameplayTuning';
 import { _decorator, Component, instantiate, math, Node, Prefab } from 'cc';
-import { Pipe } from './Pipe';
+import { BuildingObstacle } from './BuildingObstacle';
 const { ccclass, property } = _decorator;
 
-@ccclass('PipeManager')
-export class PipeManager extends Component {
+@ccclass('ObstacleSpawner')
+export class ObstacleSpawner extends Component {
     @property(Prefab)
-    pipePrefab: Prefab = null;
+    obstaclePrefab: Prefab = null;
 
     @property
     spawnRate: number = 2;
@@ -18,10 +19,10 @@ export class PipeManager extends Component {
         this.timer += deltaTime;
         if(this.timer >= this.spawnRate){
             this.timer = 0;
-            const pipeInst = instantiate(this.pipePrefab);
-            this.node.addChild(pipeInst);
-            const randomH = math.randomRangeInt(-100, 100);
-            pipeInst.setWorldPosition(this.node.getWorldPosition().add3f(0, randomH, 0));
+            const obstacle = instantiate(this.obstaclePrefab);
+            this.node.addChild(obstacle);
+            const randomH = math.randomRangeInt(GAMEPLAY.obstacleMinY, GAMEPLAY.obstacleMaxY);
+            obstacle.setWorldPosition(this.node.getWorldPosition().add3f(0, randomH, 0));
         }        
     }
 
@@ -30,9 +31,9 @@ export class PipeManager extends Component {
         // Spawn the first obstacle as soon as the revive countdown ends.
         // It still approaches from offscreen; later obstacles keep their normal spacing.
         this.timer = this.spawnRate;
-        for (const pipe of [...this.node.children]) {
-            pipe.active = false;
-            pipe.destroy();
+        for (const obstacle of [...this.node.children]) {
+            obstacle.active = false;
+            obstacle.destroy();
         }
     }
 
@@ -42,8 +43,8 @@ export class PipeManager extends Component {
 
     disableSpawn() {
         this._canSpawn = false;
-        this.node.children.forEach(pipe => {
-            pipe.getComponent(Pipe).enabled = false;
+        this.node.children.forEach(obstacle => {
+            obstacle.getComponent(BuildingObstacle).enabled = false;
         })
     }
 }

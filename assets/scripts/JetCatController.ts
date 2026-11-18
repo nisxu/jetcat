@@ -1,23 +1,38 @@
+import { GAMEPLAY } from './GameplayTuning';
 import { flame } from './JetCatVisuals';
-import { _decorator, Animation, Graphics, AudioClip, Collider2D, Component, Contact2DType, Input, input, IPhysics2DContact, RigidBody2D, Vec2 } from 'cc';
-import { Tags } from './Tags';
-import { GameManager } from './GameManager';
-import { AudioMgr } from './AudioMgr';
+import { _decorator, Graphics, AudioClip, Collider2D, Component, Contact2DType, Input, input, IPhysics2DContact, RigidBody2D, Vec2, resources } from 'cc';
+import { CollisionTags } from './CollisionTags';
+import { RunContext } from './RunContext';
+import { AudioService } from './AudioService';
 const { ccclass, property } = _decorator;
 
-@ccclass('Bird')
-export class Bird extends Component {
-    @property
-    rotateSpeed: number = 60;
+@ccclass('JetCatController')
+export class JetCatController extends Component {
     @property(AudioClip)
-    clickAudio:AudioClip = null;
+    boostAudio: AudioClip = null;
+    private boostLoading = false;
+    private loadBoostAudio() {
+        if (this.boostAudio) {
+            AudioService.inst.prepareEffects([this.boostAudio]);
+            return;
+        }
+        if (this.boostLoading) return;
+        this.boostLoading = true;
+        resources.load('boost1', AudioClip, (error, clip) => {
+            this.boostLoading = false;
+            if (error) { console.warn('[JetCat] boost1 load failed', error); return; }
+            if (!this.isValid) return;
+            this.boostAudio = clip;
+            AudioService.inst.prepareEffects([clip]);
+        });
+    }
     private jet: Graphics;
     private jetTime = 0;
     private boostTime = 0;
     private normalGravityScale = 1;
     _canControl: boolean = false;
     protected onLoad(): void {
-        this.getComponent(Animation).enabled = false;
+        this.loadBoostAudio();
         this.getComponent(RigidBody2D).fixedRotation = true;
         this.normalGravityScale = this.getComponent(RigidBody2D).gravityScale;
         this.jet = this.node.getChildByName('JetExhaust').getComponent(Graphics);
@@ -32,12 +47,10 @@ export class Bird extends Component {
     disableControl() {
         this._canControl = false;
         this.getComponent(RigidBody2D).sleep();
-        this.getComponent(Animation).enabled = false;
     }
 
     enableControl() {
         this.getComponent(RigidBody2D).wakeUp();
-        this.getComponent(Animation).enabled = false;
         this._canControl = true;
     }
 
@@ -49,7 +62,7 @@ export class Bird extends Component {
         // Keep the body and fixture registered throughout recovery on Native too.
         // Disabling/re-enabling them introduces a second physics lifecycle.
         body.gravityScale = 0;
-        this.node.setPosition(0, 80, 0);
+        this.node.setPosition(0, GAMEPLAY.reviveY, 0);
         this.node.angle = 0;
         body.wakeUp();
         this.boostTime = 0;
@@ -61,21 +74,21 @@ export class Bird extends Component {
         body.gravityScale = this.normalGravityScale;
         body.wakeUp();
         body.angularVelocity = 0;
-        body.linearVelocity = new Vec2(0, 6);
-        this.boostTime = 0.18;
+        body.linearVelocity = new Vec2(0, GAMEPLAY.reviveVelocity);
+        this.boostTime = GAMEPLAY.boostSeconds;
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         if (!this._canControl) return;
-        if(otherCollider.tag === Tags.LAND || otherCollider.tag === Tags.PIPE){
-            GameManager.inst().enterGameOver();
+        if(otherCollider.tag === CollisionTags.ROOFTOP || otherCollider.tag === CollisionTags.BUILDING){
+            RunContext.inst().enterGameOver();
         }
     }
 
     onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         if (!this._canControl) return;
-        if(otherCollider.tag === Tags.PASS){
-            GameManager.inst().addScore();
+        if(otherCollider.tag === CollisionTags.SCORE_GATE){
+            RunContext.inst().addScore();
         }
     }
 
@@ -87,11 +100,12 @@ export class Bird extends Component {
             collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
-    onTouchStart() {
+    onTouchStart(event) {
+        if (RunContext.inst().isMusicTouch(event)) return;
         if(!this._canControl) return;
-        AudioMgr.inst.playOneShot(this.clickAudio)
-        this.getComponent(RigidBody2D).linearVelocity = new Vec2(0, 10)
-        this.boostTime = 0.18;
+        this.getComponent(RigidBody2D).linearVelocity = new Vec2(0, GAMEPLAY.boostVelocity);
+        this.boostTime = GAMEPLAY.boostSeconds;
+        if (this.boostAudio) AudioService.inst.playOneShot(this.boostAudio, 1.0);
     }
     protected update(dt: number): void {
         this.jetTime += dt;
@@ -99,8 +113,8 @@ export class Bird extends Component {
         flame(this.jet, this.jetTime, this.boostTime > 0);
         this.jet.node.active = this._canControl;
         // Keep the single upright cat frame; only a subtle bounded tilt follows flight.
-        const target = this._canControl ? (this.boostTime > 0 ? 10 : -6) : 0;
-        this.node.angle += (target - this.node.angle) * Math.min(1, dt * 10);
+        const target = this._canControl ? (this.boostTime > 0 ? GAMEPLAY.boostTilt : GAMEPLAY.glideTilt) : 0;
+        this.node.angle += (target - this.node.angle) * Math.min(1, dt * GAMEPLAY.tiltResponse);
     }
 }
 

@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "Pipe",
+    "_name": "BuildingObstacle",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Pipe",
+    "_name": "BuildingObstacle",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -71,7 +71,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "PipeDown",
+    "_name": "LowerBuilding",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -257,7 +257,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "PipeUp",
+    "_name": "UpperBuilding",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {

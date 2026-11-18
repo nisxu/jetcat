@@ -1,5 +1,5 @@
 import { _decorator, Component, input, Input, Node } from 'cc';
-import { GameManager } from '../GameManager';
+import { RunContext } from '../RunContext';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameReadyUI')
@@ -8,8 +8,9 @@ export class GameReadyUI extends Component {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
     }
 
-    onTouchStart() {
-        GameManager.inst().enterPlaying();
+    onTouchStart(event) {
+        if (RunContext.inst().isMusicTouch(event)) return;
+        RunContext.inst().enterPlaying();
         this.node.active = false;
         input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
     }

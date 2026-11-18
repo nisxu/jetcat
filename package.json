@@ -1,9 +1,12 @@
 {
-  "name": "FlappyBird",
+  "name": "jetcat",
   "uuid": "7c4b3d79-1bdf-4f96-b6ca-044889843e84",
   "creator": {
     "version": "3.8.8"
   },
-  "_sourceId": "46abb11f-fc14-443e-88c2-7399237934d7",
-  "_storeId": "9a9cd7fefdd2c1caf1ebd0a1c03fc51a"
+  "scripts": {
+    "test": "node tests/score-reset.cjs && node tests/refactor-integrity.cjs",
+    "build": "sh tools/build-release.sh",
+    "build:web": "sh tools/build-release.sh --web"
+  }
 }

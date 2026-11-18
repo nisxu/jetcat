@@ -1,0 +1,48 @@
+JetCat 局部重构验证 — 2026-11-18
+
+完成内容
+- 项目名称改为 jetcat；移除运行配置中的模板商店字段，原字段保存在 docs/template-provenance.txt。
+- Bird/Pipe/PipeManager/Scroll/GameManager/GameData/AudioMgr/Tags 分别迁移为 JetCatController/BuildingObstacle/ObstacleSpawner/WorldScroller/RunController/ScoreStore/AudioService/CollisionTags。
+- 保留脚本和障碍预制体 UUID，并同步迁移场景属性、节点名与脚本引用。
+- 新增 GameplayTuning 集中记录原数值；RunContext 消除组件之间的运行时循环导入；收拢停止世界运动的逻辑。
+- 移除禁用的鸟动画、闲置奖牌帧引用及无用 gameBirds 图集。保留当前猫图、背景音乐、全部当前音效和程序绘图。
+- 清理 AudioService 教学式注释，保留音频后端兼容修复说明及错误日志。
+- 原 LICENSE 保持逐字节不变；新增 THIRD_PARTY_NOTICES.txt，构建脚本将完整声明及运行时副本写入产物。
+- 正式包关闭模拟广告且隐藏无真实提供方的 Continue。编辑器预览和 preview-phone.sh 保持原模拟复活测试流程；未接入真实广告。
+- 清洁重建旧网页产物，旧 MP3 与闲置图集不再进入包体。
+
+验证结果
+1. npm test：20 组 PASS。覆盖重开清零、最高分保持、死亡与倒计时评分门禁、复活一次限制、重复/过期广告回调、取消/失败路径、确认重置、音乐入口、连续点击音源复用、失败音频重复播放、短长屏安全区域、点击速度及倾斜响应、碰撞门禁、滚动接缝、障碍生成节奏和回收边界。
+2. tests/refactor-integrity.cjs：场景和预制体所有内部对象/脚本/资源引用检查通过；与重构前快照相比，节点变换、碰撞体、刚体、速度和生成间隔一致；保留媒体 SHA-256 一致。
+3. Cocos 3.8.8 TypeScript 编译器 noEmit 检查通过，使用当前工程引擎声明；skipLibCheck 仅跳过引擎声明内部检查。
+4. Cocos bytedance-mini-game 和 web-mobile 最终构建成功；最终日志未再出现 Circular dependency。
+5. tools/check-build.cjs：两种构建的媒体清单、旧 MP3 排除、启动配置、完整许可证分发检查通过。
+6. ttmg check：4 项通过，0 项警告，0 项错误（该结果是平台静态包检查）。
+7. Chrome 实际运行正式包：390×844 和 320×568；准备画面、音乐开关不误触开始、点击开始与喷气反馈、失败、重玩、正式模式隐藏模拟复活入口正常。
+8. 独立本地副本采用同一 finalize-build.cjs --preview：Continue、广告取消不消耗机会、广告完成、READY 3 倒计时、再次失败不再提供复活、重置确认与取消正常。
+9. 浏览器采集到的 error/warn 日志为空。测试后恢复浏览器尺寸，关闭测试标签页。
+10. git diff --check 通过。
+
+构建文件统计（排除 .ttmg 会话）
+小游戏：46 个文件，3,288,739 字节。
+网页：43 个文件，3,410,838 字节。
+未使用的图集原大小 833,178 字节，已从当前资源和构建移除。
+
+边界与保留事项
+- 未上传、未提交 Git、未推送、未发布。
+- 未获得新的 Android/iOS TikTok 真机验证；浏览器和自动检查不能证明手机上的主观操作手感、音频延迟完全一致。
+- 引擎仍报告现有 physics-2d-box2d-jsb 平台回退警告；此次未变更物理引擎配置，以避免改变手感。构建成功，浏览器碰撞正常。
+- 本机编辑器插件出现 OTA_LOGIN_REQUIRED 更新检查提示，不影响此次构建通过；没有修改账户或登录状态。
+- 原模板作者下载地址仍待补齐；保留许可证并不代表已完成上游权属核验。
+- 当前已经存在的未提交音频、界面和玩法修复均纳入基线，没有回退为 Git HEAD。
+
+操作
+npm test
+sh tools/build-release.sh                    正式小游戏包
+sh tools/build-release.sh --web              正式网页包
+sh tools/build-release.sh --preview          保留模拟复活的测试包，不用于发布
+sh tools/preview-phone.sh                    重新构建测试包并启动原真机调试流程
+
+本次修改前备份：/tmp/jetcat-refactor-20261118/before.tar.gz（含当时未提交修改；临时目录并非长期备份）
+测试和构建日志：/tmp/jetcat-refactor-20261118/
+截图：/Users/nisxu/.codex/visualizations/2026/11/18/01a1ef29-2b82-7422-866b-e27f742bb1c8/jetcat-refactor-short-screen.jpg

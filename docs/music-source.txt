@@ -6,6 +6,9 @@ Encoding: macOS afconvert, AAC-LC 64 kbps CBR, quality 127, stereo 44100 Hz.
 Decode validation: 2419200 frames, matching the original 54.857143-second loop.
 Cocos AudioSource.loop is enabled. Actual TikTok device loop transition remains to be verified.
 Previous runtime music is backed up as previous-bg.m4a. Source/backups are outside assets and are not bundled.
-License: user-supplied file; no license document was supplied with this request, so no CC0 claim is made here.
+License verified 2026-11-18: CC0 1.0. Author: Zane Little Music.
+Source: https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Download origin metadata points to this page; archived master matches the local source ZIP entry.
 
 Original masters and backups have been moved outside the Git repository to ../JetCat本地素材归档/.

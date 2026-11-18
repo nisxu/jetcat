@@ -17,3 +17,11 @@ GameOverUI 组件的 Enable Mock Ads 是开发开关，目前默认开启，以�
 接入真实广告时替换 requestReviveReward 的提供方，保留 completed / cancelled / failed 结果边界。
 仅完整观看回调可以返回 completed。不得以展示成功、无配置或请求失败作为奖励条件。
 运行 node tests/score-reset.cjs 检查三种结果、重复点击、场景过期回调和单轮复活限制。
+
+## Build modes
+
+Cocos editor preview and `tools/preview-phone.sh` keep the simulated revive flow for testing.
+`tools/build-release.sh --preview` writes an explicit test-only runtime flag.
+`tools/build-release.sh` and `tools/build-release.sh --web` disable simulation and hide Continue until a real rewarded-ad provider is implemented.
+The serialized development switch alone cannot enable test ads in a release build.
+Both modes include project and third-party license notices. Run the build script rather than distributing raw editor output.

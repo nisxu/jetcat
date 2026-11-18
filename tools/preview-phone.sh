@@ -24,14 +24,14 @@ if [ -d "$BUILD_DIR" ]; then
   done <<< "$ids"
 fi
 cd "$PROJECT_DIR"
-echo '正在重新构建正式包，请稍候……'
+echo '正在重新构建真机测试包，请稍候……'
 BUILD_LOG="$PROJECT_DIR/.ttmg/phone-build.log"
-if ! "$PROJECT_DIR/tools/build-release.sh" > "$BUILD_LOG" 2>&1; then
+if ! "$PROJECT_DIR/tools/build-release.sh" --preview > "$BUILD_LOG" 2>&1; then
   echo "构建失败，未启动旧包。完整日志：$BUILD_LOG"
   tail -n 60 "$BUILD_LOG"
   exit 1
 fi
-echo '正式构建及包检查通过。正在生成新的真机调试二维码……'
+echo '测试构建及包检查通过。正在生成新的真机调试二维码……'
 cd "$BUILD_DIR"
 if [ "${1:-}" = --background ]; then
   exec ttmg dev --client-key "$CLIENT_KEY" --mode client-preview --update-mode manual --record-logs --background --no-open --format json

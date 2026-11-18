@@ -58,7 +58,7 @@ export function building(node: Node) {
     rect(g, -w / 2, -h / 2, w, h, '#39355f');
     rect(g, -w / 2 + 3, -h / 2 + 3, w - 6, h - 6, '#7463ad');
     rect(g, -w / 2 + 5, -h / 2 + 4, 5, h - 8, '#9c8bcc');
-    // Both upper and lower obstacles use complete facades, never stretched pipe slices.
+    // Draw complete building facades for both upper and lower obstacles.
     for (let y = -h / 2 + 20; y < h / 2 - 24; y += 38) {
         const windowWidth = 8;
         const spacing = 14;
@@ -138,4 +138,21 @@ export function continueButton(node: Node) {
     g.roundRect(-28, 5, 56, 36, 7); g.stroke();
     g.fillColor = new Color('#80512f');
     g.moveTo(-6, 12); g.lineTo(10, 23); g.lineTo(-6, 34); g.close(); g.fill();
+}
+
+/** Vector music control stays sharp without adding texture assets. */
+export function musicIcon(node: Node, enabled = true) {
+    const g = surface(node);
+    g.fillColor = new Color('#fff3dc');
+    g.circle(-12, -14, 8); g.fill();
+    g.circle(12, -8, 8); g.fill();
+    g.strokeColor = new Color('#fff3dc'); g.lineWidth = 5;
+    g.moveTo(-5, -14); g.lineTo(-5, 21); g.lineTo(19, 27); g.lineTo(19, -8); g.stroke();
+    g.moveTo(-5, 13); g.lineTo(19, 19); g.stroke();
+    if (!enabled) {
+        g.strokeColor = new Color('#393451'); g.lineWidth = 10;
+        g.moveTo(-28, 30); g.lineTo(29, -29); g.stroke();
+        g.strokeColor = new Color('#edb481'); g.lineWidth = 5;
+        g.moveTo(-28, 30); g.lineTo(29, -29); g.stroke();
+    }
 }

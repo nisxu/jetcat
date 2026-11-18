@@ -13,6 +13,7 @@ export class MockRewardedAd {
             this.settle = resolve;
             try {
                 const panel = new Node('MockRewardedAd');
+                panel.layer = parent.layer;
                 this.panel = panel;
                 parent.addChild(panel);
                 // Overscan blocks input on tall screens without changing gameplay geometry.
@@ -49,6 +50,7 @@ export class MockRewardedAd {
 
     private label(parent: Node, text: string, y: number, size: number, color: string) {
         const node = new Node('Text');
+        node.layer = parent.layer;
         parent.addChild(node);
         node.setPosition(0, y, 0);
         node.addComponent(UITransform).setContentSize(560, 65);
@@ -64,6 +66,7 @@ export class MockRewardedAd {
 
     private button(parent: Node, text: string, y: number, color: string, result: RewardResult) {
         const node = new Node(result);
+        node.layer = parent.layer;
         parent.addChild(node);
         node.setPosition(0, y, 0);
         node.addComponent(UITransform).setContentSize(510, 84);
