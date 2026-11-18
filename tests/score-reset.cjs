@@ -166,7 +166,31 @@ assert.equal(limited.canRevive(), true, 'new run restores one revive');
 limited.revive();
 assert.equal(limitedPrepares, 2);
 
-const { GameOverUI } = load('UI/GameOverUI.ts', {'../JetCatVisuals': { pawMedal() {} }});
+cc.Node = class {
+  static EventType = { TOUCH_END: 'touchend' };
+  constructor(name) { this.name = name; this.children = []; this.active = true; this.isValid = true; this.components = new Map(); }
+  addChild(node) { this.children.push(node); }
+  setPosition() {}
+  addComponent(Type) { const value = new Type(); this.components.set(Type, value); return value; }
+  getComponent(Type) { return this.components.get(Type); }
+  getChildByName(name) { return this.children.find(n => n.name === name); }
+  on(_event, callback) { this.click = callback; }
+  destroy() { this.isValid = false; }
+};
+cc.UITransform = class { setContentSize() {} };
+cc.BlockInputEvents = class {};
+cc.Color = class {};
+cc.Graphics = class { rect() {} roundRect() {} fill() {} };
+cc.Label = class { static HorizontalAlign = { CENTER: 1 }; static VerticalAlign = { CENTER: 1 }; };
+cc.Button = class {};
+const { MockRewardedAd } = load('UI/MockRewardedAd.ts');
+let pauses = 0, resumes = 0, reloads = 0;
+const audio = { audioSource: { playing: true, isValid: true }, pause() { pauses++; }, resume() { resumes++; } };
+cc.director = { getScene: () => ({name: 'game'}), loadScene() { reloads++; } };
+const { GameOverUI } = load('UI/GameOverUI.ts', {
+  '../JetCatVisuals': { pawMedal() {} }, './MockRewardedAd': { MockRewardedAd },
+  '../GameManager': { GameManager }, '../AudioMgr': { AudioMgr: { inst: audio } },
+});
 const over = new GameOverUI();
 const continueButton = { active: true };
 const replayButton = { position: {x:-155, y:-293.913, z:0}, setPosition(x,y,z) { this.position={x,y,z}; } };
@@ -179,3 +203,52 @@ for (const available of [true, false, true]) {
   assert.equal(replayButton.position.y, -293.913);
 }
 console.log('PASS: one revive per run; second death hides continue and centers replay; new run restores both.');
+
+(async () => {
+  const game = scene();
+  GameManager._inst = game;
+  game.pipeManager.clearForRevive = () => {};
+  game.bird.prepareRevive = () => {};
+  game.bird.finishRevive = () => {};
+  game.enterPlaying(); game.addScore(7); game.enterGameOver();
+  const ui = new GameOverUI();
+  ui.isValid = true; ui.node = new cc.Node('GameOverUI');
+  for (const name of ['ContinueButton', 'ReplayButton']) {
+    const node = new cc.Node(name); node.addComponent(cc.Button); ui.node.addChild(node);
+  }
+  game.gameOverUI = ui;
+  for (const result of ['cancelled', 'failed', 'completed']) {
+    const pending = ui.onContinueClick();
+    assert.equal(ui.rewardPending, true);
+    assert.equal(ui.node.getChildByName('ReplayButton').getComponent(cc.Button).interactable, false);
+    await ui.onContinueClick(); // second click must not open a second panel
+    ui.onReplayClick(); assert.equal(reloads, 0);
+    const panel = ui.mockAd.panel;
+    panel.getChildByName(result).click({});
+    panel.getChildByName(result).click({}); // duplicate callback cannot reward twice
+    await pending;
+    assert.equal(ui.rewardPending, false);
+    assert.equal(GameData.getScore(), 7);
+    assert.equal(game.canRevive(), result !== 'completed');
+  }
+  game.update(3.1); game.addScore();
+  assert.equal(GameData.getScore(), 8);
+  assert.equal(pauses, 3); assert.equal(resumes, 3);
+  game.curState = 2; // subsequent death
+  assert.equal(game.canRevive(), false);
+  game.enterReady(); game.curState = 2; ui.node.active = true;
+  assert.equal(game.canRevive(), true);
+  ui.enableMockAds = false;
+  await ui.onContinueClick();
+  assert.equal(game.canRevive(), true, 'missing real provider must not grant reward');
+  ui.enableMockAds = true;
+  const abandoned = ui.onContinueClick();
+  ui.node.active = false; ui.onDisable(); await abandoned;
+  assert.equal(game.canRevive(), true, 'closing scene cancels pending request');
+  ui.node.active = true;
+  const stale = ui.onContinueClick();
+  GameManager._inst = scene();
+  ui.mockAd.panel.getChildByName('completed').click({}); await stale;
+  assert.equal(game.canRevive(), true, 'late result cannot revive another round');
+  console.log('PASS: mock complete/cancel/failure, duplicate clicks, replay lock, audio restore, stale callbacks and production fail-closed.');
+})().catch(error => { console.error(error); process.exitCode = 1; });
