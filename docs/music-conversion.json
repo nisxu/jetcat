@@ -1,0 +1,15 @@
+{
+  "encoding": "AAC-LC, 64 kbps, stereo, 44100 Hz",
+  "encodedBytes": 451476,
+  "decodedFrames": 2419200,
+  "sampleRate": 44100,
+  "durationSeconds": 54.857142857142854,
+  "expectedFrames": 2419200,
+  "exactFrameCount": true,
+  "peak": 0.836273193359375,
+  "loopBoundaryDelta": [
+    0.02105712890625,
+    0.03619384765625
+  ],
+  "deviceLoopPlayback": "not yet verified"
+}

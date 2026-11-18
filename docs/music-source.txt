@@ -1,0 +1,11 @@
+User-selected replacement: Glizzy Elf Forest LOOP.wav
+Original source path: /Users/nisxu/Downloads/loops_and_intros/Glizzy Elf Forest LOOP.wav
+The supplied full loop is retained without trimming or changing tempo.
+Runtime: assets/audios/bg.m4a; existing audio UUID retained to preserve scene references.
+Encoding: macOS afconvert, AAC-LC 64 kbps CBR, quality 127, stereo 44100 Hz.
+Decode validation: 2419200 frames, matching the original 54.857143-second loop.
+Cocos AudioSource.loop is enabled. Actual TikTok device loop transition remains to be verified.
+Previous runtime music is backed up as previous-bg.m4a. Source/backups are outside assets and are not bundled.
+License: user-supplied file; no license document was supplied with this request, so no CC0 claim is made here.
+
+Original masters and backups have been moved outside the Git repository to ../JetCat本地素材归档/.
